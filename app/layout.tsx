@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import "./globals.css";
-import Image from "next/image";
 import Link from "next/link";
+import "./globals.css";
 import { AmanahProvider } from "@/components/amanah-provider";
 
 export const metadata: Metadata = {
@@ -9,64 +8,56 @@ export const metadata: Metadata = {
   description: "Protect what matters.",
 };
 
-const navItems = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Journal", href: "/journal" },
-  { label: "Salah & Habits", href: "/salah-habits" },
-  { label: "High-Risk", href: "/high-risk" },
-  { label: "Wife Connection", href: "/wife-connection" },
-  { label: "Family Vision", href: "/family-vision" },
-  { label: "Immigration Progress", href: "/immigration-progress" },
-  { label: "Fitness & Health", href: "/fitness-health" },
-  { label: "Review", href: "/review" },
-  { label: "Settings", href: "/settings" },
-];
+function isFridayNow() {
+  return new Date().getDay() === 5;
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const showJummah = isFridayNow();
+
+  const navItems = [
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/journal", label: "Journal" },
+    { href: "/salah-habits", label: "Salah & Habits" },
+    { href: "/high-risk", label: "High-Risk" },
+    { href: "/wife-connection", label: "Wife Connection" },
+    { href: "/family-vision", label: "Family Vision" },
+    { href: "/immigration-progress", label: "Immigration Progress" },
+    { href: "/fitness-health", label: "Fitness & Health" },
+    ...(showJummah ? [{ href: "/jummah", label: "Jummah" }] : []),
+    { href: "/review", label: "Review" },
+    { href: "/settings", label: "Settings" },
+  ];
+
   return (
     <html lang="en">
       <body>
         <AmanahProvider>
-          <main className="amanah-app">
+          <div className="app-shell">
             <aside className="sidebar">
               <div className="sidebar-inner">
-                <div className="brand-block">
-                  <div className="brand-icon-wrap">
-                    <Image
-                      src="/amanah.png"
-                      alt="Amanah icon"
-                      width={44}
-                      height={44}
-                      className="brand-icon"
-                    />
-                  </div>
-                  <div>
-                    <p className="brand-eyebrow">Amanah</p>
-                    <h1 className="brand-title">Protect what matters</h1>
-                  </div>
+                <div className="sidebar-brand">
+                  <p className="sidebar-eyebrow">AMANAH</p>
+                  <h1 className="sidebar-title">Protect what matters</h1>
                 </div>
 
-                <nav className="nav">
+                <nav className="sidebar-nav">
                   {navItems.map((item) => (
-                    <Link key={item.href} href={item.href} className="nav-link">
-                      <span className="nav-item">
-                        <span className="nav-dot" />
-                        <span>{item.label}</span>
-                      </span>
+                    <Link key={item.href} href={item.href} className="sidebar-link">
+                      <span className="sidebar-dot" />
+                      <span>{item.label}</span>
                     </Link>
                   ))}
                 </nav>
-
-            
               </div>
             </aside>
 
             <section className="content">{children}</section>
-          </main>
+          </div>
         </AmanahProvider>
       </body>
     </html>

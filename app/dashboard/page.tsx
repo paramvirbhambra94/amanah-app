@@ -146,14 +146,22 @@ export default function DashboardPage() {
       </div>
 
       <div className="dashboard-top-grid">
-        <div className={`content-card dashboard-hero-card ${isFriday ? "dashboard-span-5" : "dashboard-span-6"}`}>
+        <div
+          className={`content-card dashboard-hero-card ${
+            isFriday ? "dashboard-span-5" : "dashboard-span-6"
+          }`}
+        >
           <p className="section-eyebrow">Core intention</p>
           <h3 className="content-title dashboard-hero-value">
             {settingsState.coreGoals || "Set your core goal in Settings."}
           </h3>
         </div>
 
-        <div className={`content-card dashboard-hero-card ${isFriday ? "dashboard-span-3" : "dashboard-span-6"}`}>
+        <div
+          className={`content-card dashboard-hero-card ${
+            isFriday ? "dashboard-span-3" : "dashboard-span-6"
+          }`}
+        >
           <p className="section-eyebrow">Current urge level</p>
           <h3 className="content-title dashboard-hero-value">
             {todayHighRisk?.urgeLevel ? `Level ${todayHighRisk.urgeLevel}` : "Not set"}
@@ -161,12 +169,14 @@ export default function DashboardPage() {
         </div>
 
         {isFriday && (
-          <div className="content-card dashboard-hero-card dashboard-span-4">
-            <p className="section-eyebrow">Jummah</p>
-            <h3 className="content-title dashboard-hero-value">
-              Friday-only checklist will live here.
-            </h3>
-          </div>
+          <Link href="/jummah" className="dashboard-card-link">
+            <div className="content-card dashboard-hero-card dashboard-span-4">
+              <p className="section-eyebrow">Jummah</p>
+              <h3 className="content-title dashboard-hero-value">
+                Open your Friday checklist.
+              </h3>
+            </div>
+          </Link>
         )}
       </div>
 
@@ -255,6 +265,11 @@ export default function DashboardPage() {
       </div>
 
       <style jsx>{`
+        .dashboard-card-link {
+          text-decoration: none;
+          color: inherit;
+        }
+
         .dashboard-top-grid {
           display: grid;
           grid-template-columns: repeat(12, minmax(0, 1fr));

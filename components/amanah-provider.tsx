@@ -154,6 +154,25 @@ type SettingsState = {
   onboardingAnswers: string;
 };
 
+type JummahChecklistKey =
+  | 'Ghusl completed'
+  | 'Read Surah Al-Kahf'
+  | 'Send salawat'
+  | 'Make du’a'
+  | 'Attend Jummah'
+  | 'Wear clean clothes / itr'
+  | 'Give sadaqah';
+
+type JummahChecklistState = Record<JummahChecklistKey, boolean>;
+
+type JummahRecord = {
+  checklist: JummahChecklistState;
+  khutbahReflection: string;
+  jummahNotes: string;
+};
+
+type JummahMap = Record<string, JummahRecord>;
+
 type AmanahContextType = {
   journalDraft: JournalDraft;
   journalEntries: JournalEntry[];
@@ -170,6 +189,8 @@ type AmanahContextType = {
   immigrationState: ImmigrationState;
   familyVisionState: FamilyVisionState;
   settingsState: SettingsState;
+  jummahMap: JummahMap;
+  jummahState: JummahRecord;
   setJournalField: (field: keyof JournalDraft, value: string) => void;
   clearJournalDraft: () => void;
   saveJournalEntry: () => Promise<boolean>;
@@ -223,6 +244,12 @@ type AmanahContextType = {
   resetFamilyVision: () => void;
   setSettingsField: (field: keyof SettingsState, value: string) => void;
   resetSettings: () => void;
+  toggleJummahChecklist: (item: JummahChecklistKey) => void;
+  setJummahField: (
+    field: 'khutbahReflection' | 'jummahNotes',
+    value: string
+  ) => void;
+  resetJummah: () => void;
 };
 
 const STORAGE_KEY = 'amanah-v2-state';
@@ -327,6 +354,16 @@ const defaultSettingsState: SettingsState = {
   onboardingAnswers: '',
 };
 
+const defaultJummahChecklist: JummahChecklistState = {
+  'Ghusl completed': false,
+  'Read Surah Al-Kahf': false,
+  'Send salawat': false,
+  'Make du’a': false,
+  'Attend Jummah': false,
+  'Wear clean clothes / itr': false,
+  'Give sadaqah': false,
+};
+
 function createEmptyDailyProgress(): DailyProgressRecord {
   return {
     prayers: { ...defaultSalahState },
@@ -360,6 +397,14 @@ function createEmptyHighRisk(): HighRiskRecord {
   return {
     ...defaultHighRiskRecord,
     triggers: { ...defaultHighRiskRecord.triggers },
+  };
+}
+
+function createEmptyJummah(): JummahRecord {
+  return {
+    checklist: { ...defaultJummahChecklist },
+    khutbahReflection: '',
+    jummahNotes: '',
   };
 }
 
@@ -524,6 +569,7 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
   const [immigrationState, setImmigrationState] = useState<ImmigrationState>(defaultImmigrationState);
   const [familyVisionState, setFamilyVisionState] = useState<FamilyVisionState>(defaultFamilyVisionState);
   const [settingsState, setSettingsState] = useState<SettingsState>(defaultSettingsState);
+  const [jummahMap, setJummahMap] = useState<JummahMap>({});
   const [hasLoaded, setHasLoaded] = useState(false);
   const [hasHydratedSalahHabits, setHasHydratedSalahHabits] = useState(false);
   const [hasHydratedHighRisk, setHasHydratedHighRisk] = useState(false);
@@ -556,17 +602,11 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
 
     async function loadSalahHabitsFromSupabase() {
       try {
-        const response = await fetch(
-          `/api/salah-habits?date_key=${todayKey}`,
-          { cache: 'no-store' }
-        );
-
+        const response = await fetch(`/api/salah-habits?date_key=${todayKey}`, {
+          cache: 'no-store',
+        });
         if (!response.ok) throw new Error('Failed to load salah habits');
-
-        const json = (await response.json()) as {
-          record?: Record<string, unknown> | null;
-        };
-
+        const json = (await response.json()) as { record?: Record<string, unknown> | null };
         if (json.record) {
           setDailyProgress((prev) => ({
             ...prev,
@@ -582,17 +622,11 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
 
     async function loadHighRiskFromSupabase() {
       try {
-        const response = await fetch(
-          `/api/high-risk?date_key=${todayKey}`,
-          { cache: 'no-store' }
-        );
-
+        const response = await fetch(`/api/high-risk?date_key=${todayKey}`, {
+          cache: 'no-store',
+        });
         if (!response.ok) throw new Error('Failed to load high risk');
-
-        const json = (await response.json()) as {
-          record?: Record<string, unknown> | null;
-        };
-
+        const json = (await response.json()) as { record?: Record<string, unknown> | null };
         if (json.record) {
           setHighRiskMap((prev) => ({
             ...prev,
@@ -608,17 +642,11 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
 
     async function loadWifeConnectionFromSupabase() {
       try {
-        const response = await fetch(
-          `/api/wife-connection?date_key=${todayKey}`,
-          { cache: 'no-store' }
-        );
-
+        const response = await fetch(`/api/wife-connection?date_key=${todayKey}`, {
+          cache: 'no-store',
+        });
         if (!response.ok) throw new Error('Failed to load wife connection');
-
-        const json = (await response.json()) as {
-          record?: Record<string, unknown> | null;
-        };
-
+        const json = (await response.json()) as { record?: Record<string, unknown> | null };
         if (json.record) {
           setWifeConnectionMap((prev) => ({
             ...prev,
@@ -634,17 +662,11 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
 
     async function loadFitnessFromSupabase() {
       try {
-        const response = await fetch(
-          `/api/fitness-health?date_key=${todayKey}`,
-          { cache: 'no-store' }
-        );
-
+        const response = await fetch(`/api/fitness-health?date_key=${todayKey}`, {
+          cache: 'no-store',
+        });
         if (!response.ok) throw new Error('Failed to load fitness');
-
-        const json = (await response.json()) as {
-          record?: Record<string, unknown> | null;
-        };
-
+        const json = (await response.json()) as { record?: Record<string, unknown> | null };
         if (json.record) {
           setFitnessMap((prev) => ({
             ...prev,
@@ -663,13 +685,8 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
         const response = await fetch('/api/immigration-progress', {
           cache: 'no-store',
         });
-
         if (!response.ok) throw new Error('Failed to load immigration');
-
-        const json = (await response.json()) as {
-          record?: Record<string, unknown> | null;
-        };
-
+        const json = (await response.json()) as { record?: Record<string, unknown> | null };
         if (json.record) {
           setImmigrationState(mapImmigrationRow(json.record as Record<string, unknown>));
         }
@@ -685,13 +702,8 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
         const response = await fetch('/api/family-vision', {
           cache: 'no-store',
         });
-
         if (!response.ok) throw new Error('Failed to load family vision');
-
-        const json = (await response.json()) as {
-          record?: Record<string, unknown> | null;
-        };
-
+        const json = (await response.json()) as { record?: Record<string, unknown> | null };
         if (json.record) {
           setFamilyVisionState(mapFamilyVisionRow(json.record as Record<string, unknown>));
         }
@@ -707,13 +719,8 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
         const response = await fetch('/api/settings', {
           cache: 'no-store',
         });
-
         if (!response.ok) throw new Error('Failed to load settings');
-
-        const json = (await response.json()) as {
-          record?: Record<string, unknown> | null;
-        };
-
+        const json = (await response.json()) as { record?: Record<string, unknown> | null };
         if (json.record) {
           setSettingsState(mapSettingsRow(json.record as Record<string, unknown>));
         }
@@ -740,6 +747,7 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
           immigrationState?: ImmigrationState;
           familyVisionState?: FamilyVisionState;
           settingsState?: SettingsState;
+          jummahMap?: JummahMap;
         };
 
         if (parsed.journalDraft) setJournalDraft({ ...defaultDraft, ...parsed.journalDraft });
@@ -787,6 +795,10 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
             ...parsed.settingsState,
           });
         }
+
+        if (parsed.jummahMap) {
+          setJummahMap(parsed.jummahMap);
+        }
       }
     } catch (error) {
       console.error('Failed to load local Amanah state:', error);
@@ -817,6 +829,7 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
           immigrationState,
           familyVisionState,
           settingsState,
+          jummahMap,
         })
       );
     } catch (error) {
@@ -831,6 +844,7 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
     immigrationState,
     familyVisionState,
     settingsState,
+    jummahMap,
     hasLoaded,
   ]);
 
@@ -838,6 +852,7 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
   const todayWifeConnection = wifeConnectionMap[todayKey] ?? createEmptyWifeConnection();
   const todayFitness = fitnessMap[todayKey] ?? createEmptyFitness();
   const todayHighRisk = highRiskMap[todayKey] ?? createEmptyHighRisk();
+  const todayJummah = jummahMap[todayKey] ?? createEmptyJummah();
 
   useEffect(() => {
     if (!hasHydratedSalahHabits) return;
@@ -1079,6 +1094,8 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
       immigrationState,
       familyVisionState,
       settingsState,
+      jummahMap,
+      jummahState: todayJummah,
 
       setJournalField: (field, value) => {
         setJournalDraft((prev) => ({ ...prev, [field]: value }));
@@ -1323,6 +1340,36 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
       },
 
       resetSettings: () => setSettingsState(defaultSettingsState),
+
+      toggleJummahChecklist: (item) => {
+        setJummahMap((prev) => {
+          const current = prev[todayKey] ?? createEmptyJummah();
+          return {
+            ...prev,
+            [todayKey]: {
+              ...current,
+              checklist: { ...current.checklist, [item]: !current.checklist[item] },
+            },
+          };
+        });
+      },
+
+      setJummahField: (field, value) => {
+        setJummahMap((prev) => {
+          const current = prev[todayKey] ?? createEmptyJummah();
+          return {
+            ...prev,
+            [todayKey]: { ...current, [field]: value },
+          };
+        });
+      },
+
+      resetJummah: () => {
+        setJummahMap((prev) => ({
+          ...prev,
+          [todayKey]: createEmptyJummah(),
+        }));
+      },
     }),
     [
       journalDraft,
@@ -1339,6 +1386,8 @@ export function AmanahProvider({ children }: { children: ReactNode }) {
       immigrationState,
       familyVisionState,
       settingsState,
+      jummahMap,
+      todayJummah,
     ]
   );
 
