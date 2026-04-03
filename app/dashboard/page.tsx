@@ -114,6 +114,9 @@ export default function DashboardPage() {
     immigrationState.checklist
   ).filter(Boolean).length;
 
+  const today = new Date();
+  const isFriday = today.getDay() === 5;
+
   const statCards = [
     { label: "Prayers", value: `${prayerCount} / 5` },
     { label: "Habits", value: `${habitCount} / 8` },
@@ -143,26 +146,28 @@ export default function DashboardPage() {
       </div>
 
       <div className="dashboard-top-grid">
-        <div className="content-card dashboard-hero-card dashboard-span-5">
+        <div className={`content-card dashboard-hero-card ${isFriday ? "dashboard-span-5" : "dashboard-span-6"}`}>
           <p className="section-eyebrow">Core intention</p>
           <h3 className="content-title dashboard-hero-value">
             {settingsState.coreGoals || "Set your core goal in Settings."}
           </h3>
         </div>
 
-        <div className="content-card dashboard-hero-card dashboard-span-3">
+        <div className={`content-card dashboard-hero-card ${isFriday ? "dashboard-span-3" : "dashboard-span-6"}`}>
           <p className="section-eyebrow">Current urge level</p>
           <h3 className="content-title dashboard-hero-value">
             {todayHighRisk?.urgeLevel ? `Level ${todayHighRisk.urgeLevel}` : "Not set"}
           </h3>
         </div>
 
-        <div className="content-card dashboard-hero-card dashboard-span-4">
-          <p className="section-eyebrow">Jummah</p>
-          <h3 className="content-title dashboard-hero-value">
-            Friday-only checklist will live here.
-          </h3>
-        </div>
+        {isFriday && (
+          <div className="content-card dashboard-hero-card dashboard-span-4">
+            <p className="section-eyebrow">Jummah</p>
+            <h3 className="content-title dashboard-hero-value">
+              Friday-only checklist will live here.
+            </h3>
+          </div>
+        )}
       </div>
 
       <div className="dashboard-stats-grid">
@@ -257,16 +262,20 @@ export default function DashboardPage() {
           margin-bottom: 20px;
         }
 
+        .dashboard-span-6 {
+          grid-column: span 6;
+        }
+
         .dashboard-span-5 {
           grid-column: span 5;
         }
 
-        .dashboard-span-3 {
-          grid-column: span 3;
-        }
-
         .dashboard-span-4 {
           grid-column: span 4;
+        }
+
+        .dashboard-span-3 {
+          grid-column: span 3;
         }
 
         .dashboard-hero-card {
@@ -393,9 +402,10 @@ export default function DashboardPage() {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
+          .dashboard-span-6,
           .dashboard-span-5,
-          .dashboard-span-3,
-          .dashboard-span-4 {
+          .dashboard-span-4,
+          .dashboard-span-3 {
             grid-column: span 1;
           }
 
