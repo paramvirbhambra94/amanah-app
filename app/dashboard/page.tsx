@@ -142,61 +142,43 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-          gap: "20px",
-          marginBottom: "24px",
-        }}
-      >
-        <div className="content-card" style={{ gridColumn: "span 5" }}>
+      <div className="dashboard-top-grid">
+        <div className="content-card dashboard-hero-card dashboard-span-5">
           <p className="section-eyebrow">Core intention</p>
-          <h3 className="content-title" style={{ marginTop: "10px" }}>
+          <h3 className="content-title dashboard-hero-value">
             {settingsState.coreGoals || "Set your core goal in Settings."}
           </h3>
         </div>
 
-        <div className="content-card" style={{ gridColumn: "span 3" }}>
+        <div className="content-card dashboard-hero-card dashboard-span-3">
           <p className="section-eyebrow">Current urge level</p>
-          <h3 className="content-title" style={{ marginTop: "10px" }}>
+          <h3 className="content-title dashboard-hero-value">
             {todayHighRisk?.urgeLevel ? `Level ${todayHighRisk.urgeLevel}` : "Not set"}
           </h3>
         </div>
 
-        <div className="content-card" style={{ gridColumn: "span 4" }}>
+        <div className="content-card dashboard-hero-card dashboard-span-4">
           <p className="section-eyebrow">Jummah</p>
-          <h3 className="content-title" style={{ marginTop: "10px" }}>
+          <h3 className="content-title dashboard-hero-value">
             Friday-only checklist will live here.
           </h3>
         </div>
+      </div>
 
+      <div className="dashboard-stats-grid">
         {statCards.map((item) => (
-          <div
-            key={item.label}
-            className="content-card"
-            style={{ gridColumn: "span 3", minHeight: "126px" }}
-          >
+          <div key={item.label} className="content-card dashboard-stat-card">
             <p className="section-eyebrow">{item.label}</p>
-            <h3 className="metric-value" style={{ marginTop: "12px" }}>
-              {item.value}
-            </h3>
+            <h3 className="metric-value dashboard-stat-value">{item.value}</h3>
           </div>
         ))}
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-          gap: "20px",
-          marginBottom: "28px",
-        }}
-      >
-        <div className="content-card" style={{ gridColumn: "span 6" }}>
+      <div className="dashboard-middle-grid">
+        <div className="content-card">
           <h3 className="content-title">Goal reminders</h3>
 
-          <div style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
+          <div className="dashboard-note-stack">
             <div className="mini-note-box">
               <strong>Qur’an goal:</strong>{" "}
               {settingsState.quranGoal || "Set in Settings"}
@@ -214,17 +196,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="content-card" style={{ gridColumn: "span 6" }}>
+        <div className="content-card">
           <h3 className="content-title">Quick access</h3>
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "12px",
-              marginTop: "16px",
-            }}
-          >
+          <div className="dashboard-links">
             <Link href="/journal" className="secondary-btn">
               Open Journal
             </Link>
@@ -238,102 +213,33 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div style={{ marginTop: "12px" }}>
+      <div className="dashboard-sections-wrap">
         <p className="section-eyebrow">Core sections</p>
-        <h3 className="page-title" style={{ fontSize: "2rem", marginTop: "8px" }}>
-          Your Amanah areas
-        </h3>
+        <h3 className="page-title dashboard-sections-title">Your Amanah areas</h3>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: "20px",
-            marginTop: "20px",
-          }}
-        >
+        <div className="dashboard-sections-grid">
           {coreSections.map((section) => (
             <Link
               key={section.title}
               href={section.href}
-              style={{ textDecoration: "none", color: "inherit" }}
+              className="dashboard-section-link"
             >
-              <div
-                className="content-card"
-                style={{
-                  overflow: "hidden",
-                  minHeight: "360px",
-                  padding: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <div
-                  style={{
-                    height: "160px",
-                    borderBottom: "1px solid var(--line)",
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
+              <div className="content-card dashboard-section-card">
+                <div className="dashboard-section-image">
                   <Image
                     src={section.image}
                     alt={section.title}
                     fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     style={{ objectFit: "cover" }}
                   />
 
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: "16px",
-                      left: "16px",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      padding: "8px 14px",
-                      borderRadius: "999px",
-                      background: "rgba(15, 23, 42, 0.76)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      fontSize: "0.8rem",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      backdropFilter: "blur(8px)",
-                      zIndex: 2,
-                    }}
-                  >
-                    {section.tag}
-                  </span>
+                  <span className="dashboard-section-tag">{section.tag}</span>
                 </div>
 
-                <div
-                  style={{
-                    padding: "22px 22px 24px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "10px",
-                    flex: 1,
-                  }}
-                >
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: "2rem",
-                      fontWeight: 800,
-                      lineHeight: 1.05,
-                    }}
-                  >
-                    {section.title}
-                  </h3>
-
-                  <p
-                    style={{
-                      margin: 0,
-                      color: "var(--muted)",
-                      lineHeight: 1.75,
-                      fontSize: "1rem",
-                    }}
-                  >
+                <div className="dashboard-section-body">
+                  <h3 className="dashboard-section-title">{section.title}</h3>
+                  <p className="dashboard-section-description">
                     {section.description}
                   </p>
                 </div>
@@ -342,6 +248,243 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+
+      <style jsx>{`
+        .dashboard-top-grid {
+          display: grid;
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+
+        .dashboard-span-5 {
+          grid-column: span 5;
+        }
+
+        .dashboard-span-3 {
+          grid-column: span 3;
+        }
+
+        .dashboard-span-4 {
+          grid-column: span 4;
+        }
+
+        .dashboard-hero-card {
+          min-height: 140px;
+        }
+
+        .dashboard-hero-value {
+          margin-top: 10px;
+        }
+
+        .dashboard-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+
+        .dashboard-stat-card {
+          min-height: 126px;
+        }
+
+        .dashboard-stat-value {
+          margin-top: 12px;
+        }
+
+        .dashboard-middle-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 20px;
+          margin-bottom: 28px;
+        }
+
+        .dashboard-note-stack {
+          display: grid;
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .dashboard-links {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .dashboard-sections-wrap {
+          margin-top: 12px;
+        }
+
+        .dashboard-sections-title {
+          font-size: 2rem;
+          margin-top: 8px;
+        }
+
+        .dashboard-sections-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 20px;
+          margin-top: 20px;
+        }
+
+        .dashboard-section-link {
+          text-decoration: none;
+          color: inherit;
+        }
+
+        .dashboard-section-card {
+          overflow: hidden;
+          min-height: 360px;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .dashboard-section-image {
+          height: 160px;
+          border-bottom: 1px solid var(--line);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .dashboard-section-tag {
+          position: absolute;
+          top: 16px;
+          left: 16px;
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 14px;
+          border-radius: 999px;
+          background: rgba(15, 23, 42, 0.76);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          font-size: 0.8rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          backdrop-filter: blur(8px);
+          z-index: 2;
+        }
+
+        .dashboard-section-body {
+          padding: 22px 22px 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          flex: 1;
+        }
+
+        .dashboard-section-title {
+          margin: 0;
+          font-size: 2rem;
+          font-weight: 800;
+          line-height: 1.05;
+        }
+
+        .dashboard-section-description {
+          margin: 0;
+          color: var(--muted);
+          line-height: 1.75;
+          font-size: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+          .dashboard-top-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .dashboard-span-5,
+          .dashboard-span-3,
+          .dashboard-span-4 {
+            grid-column: span 1;
+          }
+
+          .dashboard-stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .dashboard-middle-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-sections-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .dashboard-top-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+          }
+
+          .dashboard-stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+          }
+
+          .dashboard-middle-grid {
+            gap: 14px;
+            margin-bottom: 18px;
+          }
+
+          .dashboard-sections-grid {
+            gap: 14px;
+            margin-top: 14px;
+          }
+
+          .dashboard-hero-card {
+            min-height: auto;
+          }
+
+          .dashboard-stat-card {
+            min-height: auto;
+          }
+
+          .dashboard-hero-value {
+            font-size: 1.9rem;
+            line-height: 1.2;
+          }
+
+          .dashboard-stat-value {
+            font-size: 2rem;
+            line-height: 1.15;
+            word-break: break-word;
+          }
+
+          .dashboard-section-card {
+            min-height: auto;
+          }
+
+          .dashboard-section-image {
+            height: 140px;
+          }
+
+          .dashboard-section-body {
+            padding: 18px;
+          }
+
+          .dashboard-section-title {
+            font-size: 1.65rem;
+          }
+
+          .dashboard-section-description {
+            font-size: 0.96rem;
+            line-height: 1.6;
+          }
+
+          .dashboard-sections-title {
+            font-size: 1.7rem;
+          }
+
+          .dashboard-links {
+            flex-direction: column;
+            align-items: stretch;
+          }
+        }
+      `}</style>
     </section>
   );
 }
