@@ -10,6 +10,12 @@ type RelationshipInsight = {
   nextStep: string;
 };
 
+function countMatches(text: string, words: string[]) {
+  return words.reduce((count, word) => {
+    return text.includes(word) ? count + 1 : count;
+  }, 0);
+}
+
 function buildRelationshipInsight(args: {
   main: string;
   feeling: string;
@@ -35,12 +41,11 @@ function buildRelationshipInsight(args: {
     futurePlanning,
   } = args;
 
-  const combinedText = [
-    main,
-    feeling,
-    offTrack,
-    grateful,
-    needAllah,
+  const journalText = [main, feeling, offTrack, grateful, needAllah]
+    .join(" ")
+    .toLowerCase();
+
+  const wifeText = [
     appreciationNote,
     supportNote,
     relationshipNotes,
@@ -48,6 +53,8 @@ function buildRelationshipInsight(args: {
   ]
     .join(" ")
     .toLowerCase();
+
+  const combinedText = `${journalText} ${wifeText}`.trim();
 
   const hasMeaningfulJournal =
     [main, feeling, offTrack, grateful, needAllah].join("").trim().length > 0;
@@ -75,26 +82,68 @@ function buildRelationshipInsight(args: {
     "fear",
     "afraid",
     "tense",
-    "argument",
-    "clash",
-    "frustrated",
-    "overwhelmed",
     "drained",
+    "overwhelmed",
+    "pressure",
+    "panic",
+    "frustrated",
+    "frustration",
+    "sad",
+    "worry",
+    "worried",
+    "shaken",
+  ];
+
+  const conflictWords = [
+    "clash",
+    "argument",
+    "argued",
+    "fight",
+    "issue",
+    "problem",
+    "disagree",
+    "disagreed",
+    "boundary",
+    "boundaries",
+    "not comfortable",
+    "uncomfortable",
+    "misunderstood",
+    "wouldn't understand",
+    "wouldnt understand",
+    "she doesn't understand",
+    "she doesnt understand",
+    "defensive",
+    "control",
+    "forcing",
+    "restriction",
+    "restrict",
+    "respect",
+    "disrespect",
+    "tension",
+    "friction",
   ];
 
   const repairWords = [
-    "sorry",
-    "repair",
-    "soft",
     "reassure",
     "reassured",
-    "understand",
-    "listen",
-    "calm",
+    "soft",
+    "softness",
     "gentle",
-    "gentleness",
+    "gently",
+    "listen",
+    "understand",
+    "understood",
+    "calm",
+    "calmly",
+    "repair",
+    "peace",
+    "sorry",
     "apologise",
     "apologize",
+    "promise",
+    "together",
+    "make it possible",
+    "tomorrow",
   ];
 
   const positiveWords = [
@@ -104,90 +153,122 @@ function buildRelationshipInsight(args: {
     "appreciation",
     "support",
     "kind",
-    "peace",
-    "calm",
     "warm",
-    "good",
-    "better",
+    "care",
+    "caring",
     "close",
-    "together",
+    "peaceful",
+    "team",
+    "gentleness",
+    "connection",
   ];
 
-  const heavyScore = heavyWords.filter((word) =>
-    combinedText.includes(word)
-  ).length;
+  const spiritualNeedWords = [
+    "allah",
+    "guidance",
+    "patience",
+    "sabr",
+    "calm",
+    "softness",
+    "strength",
+    "help",
+    "mercy",
+    "forgiveness",
+  ];
 
-  const repairScore = repairWords.filter((word) =>
-    combinedText.includes(word)
-  ).length;
-
-  const positiveScore = positiveWords.filter((word) =>
-    combinedText.includes(word)
-  ).length;
+  const heavyScore = countMatches(combinedText, heavyWords);
+  const conflictScore = countMatches(combinedText, conflictWords);
+  const repairScore = countMatches(combinedText, repairWords);
+  const positiveScore = countMatches(combinedText, positiveWords);
+  const spiritualNeedScore = countMatches(combinedText, spiritualNeedWords);
 
   const hasOffTrack = offTrack.trim().length > 0;
-  const hasRelationshipTension = relationshipNotes.trim().length > 0;
-  const hasCareSignals =
-    wifeChecklistCount >= 2 ||
-    appreciationNote.trim().length > 0 ||
-    supportNote.trim().length > 0;
+  const hasRelationshipNotes = relationshipNotes.trim().length > 0;
   const hasFutureIntent = futurePlanning.trim().length > 0;
+  const hasAppreciation = appreciationNote.trim().length > 0;
+  const hasSupport = supportNote.trim().length > 0;
 
-  if ((heavyScore >= 2 || hasOffTrack) && hasRelationshipTension && !hasCareSignals) {
+  const careSignalScore =
+    wifeChecklistCount +
+    (hasAppreciation ? 1 : 0) +
+    (hasSupport ? 1 : 0) +
+    (hasFutureIntent ? 1 : 0);
+
+  const hasStrongTension =
+    heavyScore >= 2 ||
+    conflictScore >= 2 ||
+    (hasOffTrack && (heavyScore >= 1 || conflictScore >= 1));
+
+  const hasMixedSignals =
+    hasStrongTension && careSignalScore >= 2;
+
+  const hasLowRelationalCare = careSignalScore <= 1;
+
+  if (hasStrongTension && hasLowRelationalCare) {
     return {
       pulse: "Tense day",
       summary:
-        "Today seems emotionally heavy and that strain may have spilled into the marriage dynamic. Your heart may have been trying to protect what matters, but the day reads as more pressured than connected.",
+        "Today reads as emotionally strained, and that strain seems to have affected the relationship dynamic. There are signs of pressure, discomfort, or misunderstanding, without enough softness in the day to fully steady it.",
       nextStep:
-        "Lead tomorrow with reassurance before correction. Ask her side calmly, listen fully, and then explain your concern without repeating it harshly.",
+        "Do not go in tomorrow trying to win the point. Start by lowering the emotional temperature, acknowledge the weight of the conversation, and then speak with calm clarity.",
     };
   }
 
-  if ((heavyScore >= 1 || hasOffTrack) && hasCareSignals) {
+  if (hasMixedSignals) {
     return {
       pulse: "Repair day",
       summary:
-        "Today carried strain, but there are still clear signs of care in how you showed up. That means the relationship is not just sitting in tension — it still has room for softness, repair, and understanding.",
+        "Today seems to have carried both care and tension. There are real signs of effort in the relationship, but also enough emotional strain to show that something important did not land cleanly between you both.",
       nextStep:
-        "Do not reopen the issue with force. Start with warmth, affirm the relationship, and then move into clarity only after she feels emotionally safe.",
+        "Lead tomorrow with reassurance first. Let her feel heard before you restate your position, so the relationship feels protected while the boundary stays clear.",
     };
   }
 
-  if (hasCareSignals && positiveScore >= 2 && !hasRelationshipTension) {
+  if (conflictScore >= 1 && repairScore >= 1) {
     return {
-      pulse: "Connected day",
+      pulse: "Mixed day",
       summary:
-        "Today shows effort, care, and relational presence. The emotional tone feels more supportive than defensive, which is a good sign for the marriage dynamic.",
+        "There was friction in the relationship today, but also signs that you still wanted to handle it with care. That means the day was not simply bad — it was a day that needs wisdom and follow-through.",
       nextStep:
-        "Build on the warmth. Keep appreciation visible tomorrow and stay intentional with small acts of reassurance and emotional presence.",
+        "Keep tomorrow gentle and deliberate. Revisit the issue only after connection is rebuilt, and make understanding the first step before resolution.",
     };
   }
 
-  if (hasFutureIntent && hasCareSignals) {
-    return {
-      pulse: "Forward-looking day",
-      summary:
-        "Even if the day was not perfect, there are signs that you still want to move the relationship forward with intention. That matters because direction often matters as much as mood.",
-      nextStep:
-        "Keep tomorrow practical and calm. Focus on one meaningful action that helps your wife feel seen, not just managed.",
-    };
-  }
-
-  if (heavyScore >= 2) {
+  if (heavyScore >= 2 && spiritualNeedScore >= 1) {
     return {
       pulse: "Emotionally heavy day",
       summary:
-        "Your journal reads like the day carried emotional pressure, and that can shape how your words land in marriage. The issue may not only be what you meant, but how the weight inside you came through.",
+        "Today feels emotionally weighty. Your reflections suggest that inner pressure may have shaped how you carried yourself in the relationship, even if your intentions were sincere.",
       nextStep:
-        "Slow the tone tomorrow. Speak after grounding yourself, and make emotional safety your first goal before discussing anything sensitive.",
+        "Ground yourself before the next conversation. Ask Allah for calm and patience, then speak from steadiness rather than from inner pressure.",
     };
   }
 
-  if (hasCareSignals) {
+  if (careSignalScore >= 3 && positiveScore >= 2 && conflictScore === 0 && heavyScore === 0) {
+    return {
+      pulse: "Connected day",
+      summary:
+        "Today shows healthy relational effort. There are clear signs of care, support, and emotional attention, which strengthens trust even when the day itself is ordinary.",
+      nextStep:
+        "Build on the warmth. Keep your care visible tomorrow through one small act of reassurance or appreciation rather than waiting for a big moment.",
+    };
+  }
+
+  if (hasFutureIntent && careSignalScore >= 2) {
+    return {
+      pulse: "Forward-looking day",
+      summary:
+        "Even if today was not emotionally perfect, the relationship still shows intention. There are signs that you want to move things forward with care rather than leave them stuck.",
+      nextStep:
+        "Keep the next step simple and relational. Show her that your direction is not just about rules, but about building something good together.",
+    };
+  }
+
+  if (careSignalScore >= 2 && heavyScore === 0 && conflictScore === 0) {
     return {
       pulse: "Steady day",
       summary:
-        "There are healthy signs of care and relational effort today. Even if nothing dramatic happened, the small signals of support and attention still strengthen the marriage.",
+        "There are healthy signs of care and relational effort today. Even without a major emotional breakthrough, the small signals of support and attention still strengthen the marriage.",
       nextStep:
         "Keep consistency over intensity. A calm, caring follow-up tomorrow will do more good than a big emotional conversation.",
     };
@@ -196,9 +277,9 @@ function buildRelationshipInsight(args: {
   return {
     pulse: "Mixed day",
     summary:
-      "Today feels mixed — there is emotional movement, but not total clarity yet. Some of the day points to strain, while other parts show intention and concern.",
+      "Today carries a blend of effort, emotion, and incomplete clarity. The relationship does not read as disconnected, but it does seem to need a little more wisdom, softness, and follow-through.",
     nextStep:
-      "Use tomorrow to bring clarity with gentleness. Ask one honest question, listen properly, and keep the conversation anchored in care.",
+      "Approach tomorrow with warmth and intention. Focus on understanding first, then bring clarity in a way that protects both the boundary and the bond.",
   };
 }
 
@@ -254,7 +335,7 @@ export default function JournalPage() {
           <h2 className="page-title">Tell the truth about the day, then leave with direction.</h2>
           <p className="page-text">
             Use this space to unload what happened, what you felt, and what you need from Allah.
-            Your relationship insight below will combine this with Wife Connection so the reflection
+            Your relationship insight below combines Journal and Wife Connection so the reflection
             becomes practical.
           </p>
         </div>
